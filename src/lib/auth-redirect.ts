@@ -10,3 +10,11 @@ export function getAuthRedirect(path: string) {
 
   return new URL(path, appUrl).toString();
 }
+
+export function getSafeNextPath(value: string | null, fallback = "/home") {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) {
+    return fallback;
+  }
+
+  return value;
+}

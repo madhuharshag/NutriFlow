@@ -23,6 +23,7 @@ export default function SignupPage() {
   const [diet, setDiet] = useState("VEGETARIAN");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const router = useRouter();
 
@@ -71,13 +72,25 @@ export default function SignupPage() {
   }
 
   async function handleGoogleSignup() {
-    const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: getAuthRedirect("/auth/callback?next=/onboarding"),
-      },
-    });
+    if (googleLoading) return;
+    setError(null);
+    setGoogleLoading(true);
+    try {
+      const supabase = createClient();
+      const { error: authError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: getAuthRedirect("/auth/callback?next=/onboarding"),
+        },
+      });
+      if (authError) {
+        setError("Google sign-up is not available right now. Please use email sign-up.");
+        setGoogleLoading(false);
+      }
+    } catch {
+      setError("Google sign-up is not available right now. Please use email sign-up.");
+      setGoogleLoading(false);
+    }
   }
 
   if (success) {
@@ -141,6 +154,7 @@ export default function SignupPage() {
           onClick={handleGoogleSignup}
           className="w-full flex items-center justify-center gap-3 border border-border rounded-xl py-3 px-4 text-sm font-semibold text-text-secondary hover:bg-surface-muted hover:border-border-strong transition-all mb-5"
           type="button"
+          disabled={loading || googleLoading}
           aria-label="Continue with Google"
         >
           <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden="true">
@@ -283,7 +297,7 @@ export default function SignupPage() {
               "btn-primary btn-lg w-full",
               loading && "opacity-70"
             )}
-            disabled={loading || !email || !password}
+            disabled={loading || googleLoading || !email || !password}
             aria-busy={loading}
           >
             {loading ? (

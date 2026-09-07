@@ -14,6 +14,7 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/home";
@@ -50,13 +51,25 @@ function LoginForm() {
   }
 
   async function handleGoogleLogin() {
-    const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: getAuthRedirect(`/auth/callback?next=${encodeURIComponent(next)}`),
-      },
-    });
+    if (googleLoading) return;
+    setError(null);
+    setGoogleLoading(true);
+    try {
+      const supabase = createClient();
+      const { error: authError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: getAuthRedirect(`/auth/callback?next=${encodeURIComponent(next)}`),
+        },
+      });
+      if (authError) {
+        setError("Google sign-in is not available right now. Please use email sign-in.");
+        setGoogleLoading(false);
+      }
+    } catch {
+      setError("Google sign-in is not available right now. Please use email sign-in.");
+      setGoogleLoading(false);
+    }
   }
 
   return (
@@ -88,6 +101,7 @@ function LoginForm() {
           onClick={handleGoogleLogin}
           className="w-full flex items-center justify-center gap-3 border border-border rounded-xl py-3 px-4 text-sm font-semibold text-text-secondary hover:bg-surface-muted hover:border-border-strong transition-all mb-5"
           type="button"
+          disabled={loading || googleLoading}
           aria-label="Continue with Google"
         >
           <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden="true">
@@ -201,7 +215,7 @@ function LoginForm() {
           <button
             type="submit"
             className={cn("btn-primary btn-lg w-full", loading && "opacity-70")}
-            disabled={loading || !email || !password}
+            disabled={loading || googleLoading || !email || !password}
             aria-busy={loading}
           >
             {loading ? (
