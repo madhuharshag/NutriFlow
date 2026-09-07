@@ -99,4 +99,22 @@ describe("Recommendation Engine", () => {
     assert.strictEqual(results[0].recipe.slug, "moong-dal-khichdi");
     assert.strictEqual(results[0].rank, 1);
   });
+
+  it("normalizes ingredient names and clamps count requests safely", () => {
+    const recipe = {
+      ...sampleRecipes[0],
+      allergenTags: [" Peanut  "],
+      ingredientNames: [" Rice ", "Onion", "Tomato"],
+    };
+    const user = {
+      ...vegetarianUser,
+      allergens: ["Peanut"],
+      pantryIngredients: [" rice ", " onion "],
+      cuisineRegions: [" north_indian "],
+    };
+
+    const scored = scoreRecipe(recipe, user as UserContext);
+    assert.strictEqual(scored.isPassing, false);
+    assert.strictEqual(getTopRecommendations([recipe], user as UserContext, 0).length, 0);
+  });
 });

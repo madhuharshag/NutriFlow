@@ -82,6 +82,21 @@ const WEIGHTS = {
   variety: 2,
 };
 
+function normalizeText(value: string | undefined | null): string {
+  return (value ?? "").trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+function normalizeList(values: Array<string | undefined | null> | undefined | null): string[] {
+  return (values ?? []).map((value) => normalizeText(value)).filter(Boolean);
+}
+
+function getSafeRatio(numerator: number, denominator: number): number {
+  if (!Number.isFinite(numerator) || !Number.isFinite(denominator) || denominator <= 0) {
+    return 0;
+  }
+  return numerator / denominator;
+}
+
 // ── Diet compatibility mapping ────────────────────────────────────────────────
 
 const DIET_HIERARCHY: Record<string, string[]> = {
@@ -104,39 +119,44 @@ const SKILL_ALLOWS: Record<string, string[]> = {
 // ── Hard safety gates ─────────────────────────────────────────────────────────
 
 function passesHardGates(recipe: RecipeForScoring, ctx: UserContext): boolean {
+  const normalizedUserAllergens = normalizeList(ctx.allergens);
+  const normalizedRecipeAllergens = normalizeList(recipe.allergenTags);
+
   // 1. Allergen safety — never suggest meals with declared allergens
-  const userAllergenSet = new Set(ctx.allergens.map((a) => a.toLowerCase()));
-  for (const allergenTag of recipe.allergenTags) {
-    if (userAllergenSet.has(allergenTag.toLowerCase())) {
+  const userAllergenSet = new Set(normalizedUserAllergens);
+  for (const allergenTag of normalizedRecipeAllergens) {
+    if (userAllergenSet.has(allergenTag)) {
       return false;
     }
   }
 
   // 2. Time limit — never exceed hard time limit
-  if (recipe.totalTimeMinutes > ctx.timeMinutes * 1.2) {
+  if (ctx.timeMinutes > 0 && recipe.totalTimeMinutes > ctx.timeMinutes * 1.2) {
     // 20% buffer for flexibility
     return false;
   }
 
   // 3. Budget limit — never exceed hard budget max (allow 20% buffer)
-  if (recipe.costMin > ctx.budgetMax * 1.2) {
+  if (ctx.budgetMax > 0 && recipe.costMin > ctx.budgetMax * 1.2) {
     return false;
   }
 
   // 4. Diet compatibility — hard filter
-  const allowedPatterns = DIET_HIERARCHY[ctx.dietaryPattern] ?? [];
-  const hasCompatibleDiet = recipe.dietaryPatterns.some((d) =>
-    allowedPatterns.includes(d)
+  const userDiet = normalizeText(ctx.dietaryPattern) || "vegetarian";
+  const allowedPatterns = (DIET_HIERARCHY[userDiet.toUpperCase()] ?? []).map((d) =>
+    normalizeText(d)
   );
+  const recipePatterns = normalizeList(recipe.dietaryPatterns);
+  const hasCompatibleDiet = recipePatterns.some((d) => allowedPatterns.includes(d));
   if (!hasCompatibleDiet) {
     return false;
   }
 
   // 5. Food dislikes — if a disliked ingredient is a primary ingredient, filter out
-  const dislikesSet = new Set(ctx.foodDislikes.map((d) => d.toLowerCase()));
-  const primaryIngredients = recipe.ingredientNames.slice(0, 5); // first 5 are usually primary
+  const dislikesSet = new Set(normalizeList(ctx.foodDislikes));
+  const primaryIngredients = recipe.ingredientNames.slice(0, 5).map((ing) => normalizeText(ing)); // first 5 are usually primary
   for (const ing of primaryIngredients) {
-    if (dislikesSet.has(ing.toLowerCase())) {
+    if (dislikesSet.has(ing)) {
       return false;
     }
   }
@@ -150,10 +170,11 @@ function scoreIngredientMatch(
   recipe: RecipeForScoring,
   ctx: UserContext
 ): { score: number; matchedCount: number; totalCount: number } {
-  if (ctx.pantryIngredients.length === 0) return { score: 0.5, matchedCount: 0, totalCount: 0 };
+  const pantryIngredients = normalizeList(ctx.pantryIngredients);
+  if (pantryIngredients.length === 0) return { score: 0.5, matchedCount: 0, totalCount: 0 };
 
-  const pantrySet = new Set(ctx.pantryIngredients.map((i) => i.toLowerCase()));
-  const recipeIngredients = recipe.ingredientNames.map((i) => i.toLowerCase());
+  const pantrySet = new Set(pantryIngredients);
+  const recipeIngredients = normalizeList(recipe.ingredientNames);
   const matchedCount = recipeIngredients.filter((i) => pantrySet.has(i)).length;
   const totalCount = recipeIngredients.length;
 
@@ -167,9 +188,13 @@ function scoreDietCompatibility(
   recipe: RecipeForScoring,
   ctx: UserContext
 ): number {
-  const allowedPatterns = DIET_HIERARCHY[ctx.dietaryPattern] ?? [];
-  const hasExact = recipe.dietaryPatterns.includes(ctx.dietaryPattern);
-  const hasCompatible = recipe.dietaryPatterns.some((d) =>
+  const userDiet = normalizeText(ctx.dietaryPattern) || "vegetarian";
+  const allowedPatterns = (DIET_HIERARCHY[userDiet.toUpperCase()] ?? []).map((d) =>
+    normalizeText(d)
+  );
+  const normalizedRecipePatterns = normalizeList(recipe.dietaryPatterns);
+  const hasExact = normalizedRecipePatterns.includes(userDiet);
+  const hasCompatible = normalizedRecipePatterns.some((d) =>
     allowedPatterns.includes(d)
   );
 
@@ -183,15 +208,15 @@ function scoreAllergenSafety(
   ctx: UserContext
 ): number {
   // If it passed the hard gate, it's safe
-  const userAllergenSet = new Set(ctx.allergens.map((a) => a.toLowerCase()));
-  const hasAllergen = recipe.allergenTags.some((tag) =>
-    userAllergenSet.has(tag.toLowerCase())
+  const userAllergenSet = new Set(normalizeList(ctx.allergens));
+  const hasAllergen = normalizeList(recipe.allergenTags).some((tag) =>
+    userAllergenSet.has(tag)
   );
   return hasAllergen ? 0 : 1.0;
 }
 
 function scoreTimeFit(recipe: RecipeForScoring, ctx: UserContext): number {
-  const ratio = recipe.totalTimeMinutes / ctx.timeMinutes;
+  const ratio = getSafeRatio(recipe.totalTimeMinutes, ctx.timeMinutes);
   if (ratio <= 0.5) return 1.0; // Very quick — perfect
   if (ratio <= 0.7) return 0.9;
   if (ratio <= 0.9) return 0.75;
@@ -202,7 +227,7 @@ function scoreTimeFit(recipe: RecipeForScoring, ctx: UserContext): number {
 
 function scoreBudgetFit(recipe: RecipeForScoring, ctx: UserContext): number {
   const avgCost = (recipe.costMin + recipe.costMax) / 2;
-  const ratio = avgCost / ctx.budgetMax;
+  const ratio = getSafeRatio(avgCost, ctx.budgetMax);
   if (ratio <= 0.5) return 1.0; // Very affordable
   if (ratio <= 0.7) return 0.9;
   if (ratio <= 0.9) return 0.75;
@@ -225,23 +250,26 @@ function scorePreferenceFit(
   ctx: UserContext
 ): number {
   let score = 0;
+  const normalizedUserCuisineRegions = normalizeList(ctx.cuisineRegions);
+  const normalizedRecipeCuisine = normalizeText(recipe.cuisineRegion);
+  const normalizedMealType = normalizeText(ctx.mealType);
 
   // Cuisine preference
-  if (ctx.cuisineRegions.length === 0) {
+  if (normalizedUserCuisineRegions.length === 0) {
     score += 0.5;
   } else if (
-    ctx.cuisineRegions.includes(recipe.cuisineRegion) ||
-    ctx.cuisineRegions.includes("ANY")
+    normalizedUserCuisineRegions.includes(normalizedRecipeCuisine) ||
+    normalizedUserCuisineRegions.includes("any")
   ) {
     score += 1.0;
-  } else if (ctx.cuisineRegions.includes("MIXED_INDIAN")) {
+  } else if (normalizedUserCuisineRegions.includes("mixed_indian")) {
     score += 0.7;
   } else {
     score += 0.3;
   }
 
   // Meal type match
-  if (recipe.mealTypes.includes(ctx.mealType)) {
+  if (normalizeList(recipe.mealTypes).includes(normalizedMealType)) {
     score += 1.0;
   } else {
     score += 0;
@@ -259,12 +287,10 @@ function scoreNutritionHeuristic(
   // Has a protein source — good for balance
   if (recipe.proteinSource) score += 0.2;
 
+  const normalizedGoals = normalizeList(ctx.goals);
   // Goals-based heuristic
-  if (ctx.goals.includes("eat_balanced") && recipe.proteinSource) score += 0.15;
-  if (
-    ctx.goals.includes("save_money") &&
-    recipe.costMin <= ctx.budgetMax * 0.6
-  )
+  if (normalizedGoals.includes("eat_balanced") && recipe.proteinSource) score += 0.15;
+  if (normalizedGoals.includes("save_money") && ctx.budgetMax > 0 && recipe.costMin <= ctx.budgetMax * 0.6)
     score += 0.15;
 
   return Math.min(score, 1.0);
@@ -272,9 +298,10 @@ function scoreNutritionHeuristic(
 
 function scoreVariety(recipe: RecipeForScoring, ctx: UserContext): number {
   if (!ctx.recentRecipeIds || ctx.recentRecipeIds.length === 0) return 0.5;
+  const recentRecipeIds = ctx.recentRecipeIds.map((id) => normalizeText(id));
   // Penalize recently recommended recipes
-  if (ctx.recentRecipeIds.slice(0, 5).includes(recipe.id)) return 0;
-  if (ctx.recentRecipeIds.slice(5, 10).includes(recipe.id)) return 0.4;
+  if (recentRecipeIds.slice(0, 5).includes(normalizeText(recipe.id))) return 0;
+  if (recentRecipeIds.slice(5, 10).includes(normalizeText(recipe.id))) return 0.4;
   return 1.0;
 }
 
@@ -287,6 +314,8 @@ function generateReasons(
   totalCount: number
 ): string[] {
   const reasons: string[] = [];
+  const userDiet = normalizeText(ctx.dietaryPattern) || "vegetarian";
+  const normalizedRecipeDietaryPatterns = normalizeList(recipe.dietaryPatterns);
 
   // Ingredient match
   if (matchedCount > 0) {
@@ -296,34 +325,30 @@ function generateReasons(
   }
 
   // Diet
-  if (recipe.dietaryPatterns.includes(ctx.dietaryPattern)) {
+  if (normalizedRecipeDietaryPatterns.includes(userDiet)) {
     const labels: Record<string, string> = {
-      VEGETARIAN: "vegetarian",
-      VEGAN: "vegan",
-      EGGETARIAN: "eggetarian",
-      JAIN_FRIENDLY: "Jain-friendly",
-      NON_VEGETARIAN: "non-vegetarian",
+      vegetarian: "vegetarian",
+      vegan: "vegan",
+      eggitarian: "eggetarian",
+      jain_friendly: "Jain-friendly",
+      non_vegetarian: "non-vegetarian",
+      other: "other",
     };
-    reasons.push(`Matches your ${labels[ctx.dietaryPattern] ?? ""} preference`);
+    reasons.push(`Matches your ${labels[userDiet] ?? userDiet.replace(/_/g, " ")} preference`);
   }
 
   // Time
-  if (recipe.totalTimeMinutes <= ctx.timeMinutes) {
+  if (ctx.timeMinutes > 0 && recipe.totalTimeMinutes <= ctx.timeMinutes) {
     reasons.push(`Ready in ${recipe.totalTimeMinutes} min — fits your schedule`);
   }
 
   // Budget
   const avgCost = (recipe.costMin + recipe.costMax) / 2;
-  if (avgCost <= ctx.budgetMax) {
+  if (ctx.budgetMax > 0 && avgCost <= ctx.budgetMax) {
     reasons.push(`Within your ₹${ctx.budgetMax} budget (est. ₹${recipe.costMin}–₹${recipe.costMax})`);
   }
 
   // Skill
-  const skillLabels: Record<string, string> = {
-    BEGINNER: "beginner",
-    COMFORTABLE: "intermediate",
-    CONFIDENT: "confident cook",
-  };
   if (SKILL_ALLOWS[ctx.cookingSkill]?.includes(recipe.difficultyLevel)) {
     reasons.push(`Beginner-friendly steps`);
   }
@@ -340,9 +365,9 @@ function getMissingIngredients(
   recipe: RecipeForScoring,
   ctx: UserContext
 ): string[] {
-  const pantrySet = new Set(ctx.pantryIngredients.map((i) => i.toLowerCase()));
-  return recipe.ingredientNames
-    .filter((i) => !pantrySet.has(i.toLowerCase()))
+  const pantrySet = new Set(normalizeList(ctx.pantryIngredients));
+  return normalizeList(recipe.ingredientNames)
+    .filter((i) => !pantrySet.has(i))
     .slice(0, 5); // max 5 missing
 }
 
@@ -432,11 +457,13 @@ export function getTopRecommendations(
   ctx: UserContext,
   count = 3
 ): ScoredRecipe[] {
+  const safeCount = Number.isFinite(count) ? Math.max(0, Math.trunc(Number(count))) : 3;
+
   const scored = recipes
     .map((recipe) => scoreRecipe(recipe, ctx))
     .filter((r) => r.isPassing)
     .sort((a, b) => b.totalScore - a.totalScore)
-    .slice(0, count)
+    .slice(0, safeCount)
     .map((r, i) => ({ ...r, rank: i + 1 }));
 
   return scored;
