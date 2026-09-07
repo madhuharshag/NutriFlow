@@ -1,0 +1,593 @@
+// NutriFlow — Prisma Schema
+// Database: PostgreSQL via Supabase
+// ORM: Prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum DietaryPattern {
+  VEGETARIAN
+  EGGETARIAN
+  NON_VEGETARIAN
+  VEGAN
+  JAIN_FRIENDLY
+  OTHER
+}
+
+enum CookingSkill {
+  BEGINNER
+  COMFORTABLE
+  CONFIDENT
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  SNACK
+  DINNER
+}
+
+enum CuisineRegion {
+  NORTH_INDIAN
+  SOUTH_INDIAN
+  EAST_INDIAN
+  WEST_INDIAN
+  MIXED_INDIAN
+  PAN_INDIAN
+  ANY
+}
+
+enum DifficultyLevel {
+  VERY_EASY
+  EASY
+  MODERATE
+  HARD
+}
+
+enum UserRole {
+  USER
+  CONTENT_REVIEWER
+  ADMIN
+  SUPPORT_STAFF
+}
+
+enum RequestStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  REJECTED
+}
+
+enum GroceryCategory {
+  VEGETABLES
+  FRUITS
+  GRAINS
+  PULSES
+  DAIRY
+  PROTEIN
+  SPICES
+  PANTRY
+  OTHER
+}
+
+enum IngredientCategory {
+  GRAIN
+  PULSE
+  VEGETABLE
+  FRUIT
+  DAIRY
+  PROTEIN
+  SPICE
+  OIL
+  CONDIMENT
+  HERB
+  NUT_SEED
+  SWEETENER
+  BEVERAGE
+  OTHER
+}
+
+enum ConsentType {
+  TERMS_OF_SERVICE
+  PRIVACY_POLICY
+  ANALYTICS
+  MARKETING
+  DATA_PROCESSING
+}
+
+// ─────────────────────────────────────────────
+// USER & AUTH
+// ─────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(uuid())
+  supabaseId String  @unique // Supabase auth user ID
+  email     String   @unique
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime? // soft delete
+
+  // Relations
+  profile           UserProfile?
+  preference        UserPreference?
+  allergens         UserAllergen[]
+  pantryItems       PantryItem[]
+  mealPlans         MealPlan[]
+  mealEvents        MealEvent[]
+  recommendations   Recommendation[]
+  groceryLists      GroceryList[]
+  consents          Consent[]
+  dataExportRequests DataExportRequest[]
+  deletionRequests  DeletionRequest[]
+  auditLogs         AuditLog[]
+
+  @@index([supabaseId])
+  @@index([email])
+  @@map("users")
+}
+
+model UserProfile {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName       String?
+  preferredLanguage String   @default("en")
+  onboardingDone    Boolean  @default(false)
+  avatarUrl         String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("user_profiles")
+}
+
+model UserPreference {
+  id              String         @id @default(uuid())
+  userId          String         @unique
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dietaryPattern  DietaryPattern @default(VEGETARIAN)
+  cuisineRegions  CuisineRegion[]
+  cookingSkill    CookingSkill   @default(BEGINNER)
+  budgetMin       Int            @default(30)  // INR
+  budgetMax       Int            @default(150) // INR
+  timeMinutes     Int            @default(30)  // max cooking time
+  goals           String[]       // e.g. ["eat_regularly", "save_money"]
+  foodDislikes    String[]       // ingredient names
+  mealTimePrefs   MealType[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@map("user_preferences")
+}
+
+model UserAllergen {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  allergen   String   // e.g. "peanuts", "dairy", "gluten"
+  severity   String?  // "intolerance" | "allergy" | "severe"
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, allergen])
+  @@index([userId])
+  @@map("user_allergens")
+}
+
+// ─────────────────────────────────────────────
+// FOOD & NUTRITION DATA
+// ─────────────────────────────────────────────
+
+model ContentSource {
+  id           String   @id @default(uuid())
+  name         String   // e.g. "IFCT 2017", "USDA FoodData Central"
+  version      String?
+  url          String?
+  licenseNote  String?
+  verifiedAt   DateTime?
+  createdAt    DateTime @default(now())
+
+  foods        Food[]
+  nutrients    NutrientDefinition[]
+
+  @@map("content_sources")
+}
+
+model NutrientDefinition {
+  id          String        @id @default(uuid())
+  name        String        @unique // e.g. "energy_kcal"
+  displayName String        // "Energy (kcal)"
+  unit        String        // "kcal", "g", "mg", "mcg"
+  sourceId    String?
+  source      ContentSource? @relation(fields: [sourceId], references: [id])
+
+  foodNutrients FoodNutrient[]
+  recipeNutrients RecipeNutrition[]
+
+  @@map("nutrient_definitions")
+}
+
+model Ingredient {
+  id           String             @id @default(uuid())
+  name         String             @unique
+  nameHindi    String?
+  category     IngredientCategory
+  commonNames  String[]           // aliases
+  isAllergen   Boolean            @default(false)
+  allergenTags String[]           // e.g. ["gluten", "dairy"]
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  foods             Food[]
+  recipeIngredients RecipeIngredient[]
+  pantryItems       PantryItem[]
+  substitutionRules SubstitutionRule[] @relation("OriginalIngredient")
+  substitutes       SubstitutionRule[] @relation("SubstituteIngredient")
+
+  @@index([name])
+  @@map("ingredients")
+}
+
+model Food {
+  id               String        @id @default(uuid())
+  name             String
+  ingredientId     String?
+  ingredient       Ingredient?   @relation(fields: [ingredientId], references: [id])
+  sourceId         String?
+  source           ContentSource? @relation(fields: [sourceId], references: [id])
+  confidenceLevel  String        @default("medium") // "high" | "medium" | "low"
+  usageNote        String?       // "Values represent raw ingredient per 100g"
+  verifiedAt       DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  nutrients FoodNutrient[]
+
+  @@index([name])
+  @@map("foods")
+}
+
+model FoodNutrient {
+  id               String             @id @default(uuid())
+  foodId           String
+  food             Food               @relation(fields: [foodId], references: [id], onDelete: Cascade)
+  nutrientId       String
+  nutrient         NutrientDefinition @relation(fields: [nutrientId], references: [id])
+  valuePer100g     Float
+  minValue         Float?             // uncertainty range
+  maxValue         Float?
+  createdAt        DateTime           @default(now())
+
+  @@unique([foodId, nutrientId])
+  @@map("food_nutrients")
+}
+
+// ─────────────────────────────────────────────
+// RECIPES
+// ─────────────────────────────────────────────
+
+model Recipe {
+  id              String         @id @default(uuid())
+  slug            String         @unique
+  name            String
+  description     String
+  mealTypes       MealType[]
+  cuisineRegion   CuisineRegion
+  dietaryPatterns DietaryPattern[]
+  difficultyLevel DifficultyLevel
+  prepTimeMinutes Int
+  cookTimeMinutes Int
+  totalTimeMinutes Int           // stored for efficient querying
+  servings        Int            @default(2)
+  costMin         Int            // INR
+  costMax         Int            // INR
+  imageUrl        String?
+  isPublished     Boolean        @default(true)
+  tags            String[]
+  proteinSource   String?
+  nutritionNote   String?        // "Estimates vary by portion, oil, and ingredients"
+  whyItWorks      String?        // "Balanced macro profile with dal providing protein..."
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  // Relations
+  ingredients         RecipeIngredient[]
+  steps               RecipeStep[]
+  nutritionEstimates  RecipeNutrition[]
+  recommendedIn       Recommendation[]
+  savedByUsers        MealEvent[]
+  mealPlanItems       MealPlanItem[]
+  groceryItems        GroceryItem[]
+
+  @@index([slug])
+  @@index([totalTimeMinutes])
+  @@index([costMin, costMax])
+  @@index([difficultyLevel])
+  @@map("recipes")
+}
+
+model RecipeIngredient {
+  id              String     @id @default(uuid())
+  recipeId        String
+  recipe          Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  ingredientId    String
+  ingredient      Ingredient @relation(fields: [ingredientId], references: [id])
+  quantity        Float?
+  unit            String?    // "katori", "tablespoon", "roti", etc.
+  notes           String?    // "or to taste"
+  isOptional      Boolean    @default(false)
+  orderIndex      Int        @default(0)
+  createdAt       DateTime   @default(now())
+
+  substitutions SubstitutionRule[] @relation("RecipeIngredientSubstitutions")
+
+  @@index([recipeId])
+  @@map("recipe_ingredients")
+}
+
+model RecipeStep {
+  id          String   @id @default(uuid())
+  recipeId    String
+  recipe      Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  stepNumber  Int
+  instruction String
+  tipNote     String?
+  durationMin Int?     // estimated time for this step
+  createdAt   DateTime @default(now())
+
+  @@unique([recipeId, stepNumber])
+  @@index([recipeId])
+  @@map("recipe_steps")
+}
+
+model RecipeNutrition {
+  id               String             @id @default(uuid())
+  recipeId         String
+  recipe           Recipe             @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  nutrientId       String
+  nutrient         NutrientDefinition @relation(fields: [nutrientId], references: [id])
+  valueMin         Float              // per serving
+  valueMax         Float              // per serving (range due to uncertainty)
+  calculationNote  String?            // "Based on IFCT 2017 values, 1 tsp oil assumed"
+  calcVersion      String             @default("1.0")
+  createdAt        DateTime           @default(now())
+
+  @@unique([recipeId, nutrientId])
+  @@map("recipe_nutrition")
+}
+
+model SubstitutionRule {
+  id                  String           @id @default(uuid())
+  originalIngredientId String
+  originalIngredient  Ingredient       @relation("OriginalIngredient", fields: [originalIngredientId], references: [id])
+  substituteIngredientId String
+  substituteIngredient Ingredient      @relation("SubstituteIngredient", fields: [substituteIngredientId], references: [id])
+  recipeIngredientId  String?
+  recipeIngredient    RecipeIngredient? @relation("RecipeIngredientSubstitutions", fields: [recipeIngredientId], references: [id])
+  ratio               Float            @default(1.0) // 1 unit original = ratio units substitute
+  note                String?          // "Use 1:1 ratio; texture will differ slightly"
+  createdAt           DateTime         @default(now())
+
+  @@map("substitution_rules")
+}
+
+// ─────────────────────────────────────────────
+// PANTRY
+// ─────────────────────────────────────────────
+
+model PantryItem {
+  id           String     @id @default(uuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ingredientId String
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  isLow        Boolean    @default(false)
+  expiryDate   DateTime?
+  notes        String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([userId, ingredientId])
+  @@index([userId])
+  @@map("pantry_items")
+}
+
+// ─────────────────────────────────────────────
+// MEAL PLANNING
+// ─────────────────────────────────────────────
+
+model MealPlan {
+  id        String         @id @default(uuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String?
+  weekStart DateTime?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  items MealPlanItem[]
+
+  @@index([userId])
+  @@map("meal_plans")
+}
+
+model MealPlanItem {
+  id          String    @id @default(uuid())
+  mealPlanId  String
+  mealPlan    MealPlan  @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  recipeId    String
+  recipe      Recipe    @relation(fields: [recipeId], references: [id])
+  mealType    MealType
+  plannedDate DateTime?
+  servings    Int       @default(1)
+  notes       String?
+  createdAt   DateTime  @default(now())
+
+  @@index([mealPlanId])
+  @@map("meal_plan_items")
+}
+
+model MealEvent {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipeId    String
+  recipe      Recipe    @relation(fields: [recipeId], references: [id])
+  eventType   String    // "saved" | "cooked" | "rejected"
+  mealType    MealType?
+  rejectedReason String? // "too_expensive" | "too_difficult" | "missing_ingredients" | "not_my_taste"
+  notes       String?
+  cookedAt    DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+  @@index([userId, eventType])
+  @@map("meal_events")
+}
+
+// ─────────────────────────────────────────────
+// RECOMMENDATIONS
+// ─────────────────────────────────────────────
+
+model Recommendation {
+  id                  String   @id @default(uuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipeId            String
+  recipe              Recipe   @relation(fields: [recipeId], references: [id])
+  rank                Int
+  totalScore          Float
+  ingredientMatch     Float
+  dietCompatibility   Float
+  allergenSafety      Float
+  timeFit             Float
+  budgetFit           Float
+  skillFit            Float
+  preferenceFit       Float
+  nutritionHeuristic  Float
+  varietyScore        Float
+  humanReasons        String[] // ["Uses 4 of your 5 pantry ingredients", "Under ₹60 budget"]
+  missingIngredients  String[]
+  suitabilityLabel    String?  // "Great pantry match"
+  contextSnapshot     Json     // snapshot of user context at recommendation time
+  createdAt           DateTime @default(now())
+
+  @@index([userId])
+  @@index([userId, createdAt])
+  @@map("recommendations")
+}
+
+// ─────────────────────────────────────────────
+// GROCERY LIST
+// ─────────────────────────────────────────────
+
+model GroceryList {
+  id        String        @id @default(uuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  items GroceryItem[]
+
+  @@index([userId])
+  @@map("grocery_lists")
+}
+
+model GroceryItem {
+  id              String          @id @default(uuid())
+  groceryListId   String
+  groceryList     GroceryList     @relation(fields: [groceryListId], references: [id], onDelete: Cascade)
+  recipeId        String?
+  recipe          Recipe?         @relation(fields: [recipeId], references: [id])
+  name            String
+  quantity        String?
+  unit            String?
+  category        GroceryCategory @default(OTHER)
+  isChecked       Boolean         @default(false)
+  isManual        Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([groceryListId])
+  @@map("grocery_items")
+}
+
+// ─────────────────────────────────────────────
+// PRIVACY & COMPLIANCE
+// ─────────────────────────────────────────────
+
+model Consent {
+  id          String      @id @default(uuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  consentType ConsentType
+  granted     Boolean
+  version     String      // policy version at time of consent
+  ipHash      String?     // hashed IP, not raw
+  userAgent   String?
+  createdAt   DateTime    @default(now())
+  revokedAt   DateTime?
+
+  @@index([userId])
+  @@map("consents")
+}
+
+model DataExportRequest {
+  id          String        @id @default(uuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status      RequestStatus @default(PENDING)
+  requestedAt DateTime      @default(now())
+  processedAt DateTime?
+  downloadUrl String?       // signed URL, short-lived
+  expiresAt   DateTime?
+  notes       String?
+
+  @@index([userId])
+  @@map("data_export_requests")
+}
+
+model DeletionRequest {
+  id          String        @id @default(uuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status      RequestStatus @default(PENDING)
+  reason      String?
+  requestedAt DateTime      @default(now())
+  scheduledAt DateTime?     // when deletion is scheduled
+  completedAt DateTime?
+
+  @@index([userId])
+  @@map("deletion_requests")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String   // "login", "preference_update", "data_export_requested", etc.
+  resource  String?  // "user_preference", "pantry_item", etc.
+  resourceId String?
+  metadata  Json?    // non-PII metadata about the action
+  ipHash    String?  // hashed, never raw
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

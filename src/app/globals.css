@@ -1,0 +1,366 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap");
+
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+
+/* ===================================================================
+   NutriFlow Design System — Global CSS
+   =================================================================== */
+
+@layer base {
+  :root {
+    /* Brand Colors */
+    --color-brand-green: #1f6b4f;
+    --color-brand-green-light: #2e8b57;
+    --color-brand-green-dark: #155240;
+    --color-brand-turmeric: #e6a63b;
+    --color-brand-cream: #faf8f2;
+
+    /* Surfaces */
+    --color-surface: #ffffff;
+    --color-surface-muted: #f8f9fa;
+
+    /* Text */
+    --color-text-primary: #1e2933;
+    --color-text-secondary: #3d4f5c;
+    --color-text-muted: #5d6872;
+
+    /* Borders */
+    --color-border: #e5e9ed;
+    --color-border-muted: #f0f2f5;
+
+    /* Status */
+    --color-success: #2e8b57;
+    --color-warning: #c98218;
+    --color-error: #b42318;
+
+    /* Radius */
+    --radius-sm: 0.375rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
+    --radius-2xl: 2rem;
+    --radius-full: 9999px;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    font-family: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+    background-color: var(--color-brand-cream);
+    color: var(--color-text-primary);
+    line-height: 1.6;
+    font-size: 1rem;
+  }
+
+  /* Accessibility: Reduced Motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Focus styles — accessible, branded */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-green);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Heading hierarchy */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+  }
+
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.25rem);
+  }
+  h2 {
+    font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+  }
+  h3 {
+    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  }
+
+  p {
+    color: var(--color-text-secondary);
+  }
+
+  /* Links */
+  a {
+    color: var(--color-brand-green);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  a:hover {
+    color: var(--color-brand-green-dark);
+  }
+
+  /* Selection */
+  ::selection {
+    background-color: rgba(31, 107, 79, 0.15);
+    color: var(--color-brand-green-dark);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-surface-muted);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #c5cdd5;
+    border-radius: var(--radius-full);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #8e9aa3;
+  }
+}
+
+@layer components {
+  /* -------- Buttons -------- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 cursor-pointer select-none;
+    @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 cursor-pointer select-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none bg-brand-green text-white hover:bg-brand-green-dark active:scale-[0.98] shadow-md hover:shadow-lg;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 cursor-pointer select-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none bg-white text-brand-green border-2 border-brand-green hover:bg-brand-green hover:text-white;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 cursor-pointer select-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none bg-transparent text-text-muted hover:bg-surface-muted hover:text-text-primary;
+  }
+
+  .btn-turmeric {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 cursor-pointer select-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none bg-brand-turmeric text-white hover:bg-brand-turmeric-dark active:scale-[0.98] shadow-md hover:shadow-lg;
+  }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-sm;
+  }
+
+  .btn-md {
+    @apply px-5 py-2.5 text-sm;
+  }
+
+  .btn-lg {
+    @apply px-7 py-3.5 text-base;
+  }
+
+  .btn-xl {
+    @apply px-8 py-4 text-lg;
+  }
+
+  /* -------- Cards -------- */
+  .card {
+    @apply bg-white rounded-2xl shadow-card border border-border-muted;
+  }
+
+  .card-hover {
+    @apply bg-white rounded-2xl shadow-card border border-border-muted transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5;
+  }
+
+  .card-surface {
+    @apply bg-surface-muted rounded-2xl border border-border-muted;
+  }
+
+  /* -------- Forms -------- */
+  .input {
+    @apply w-full rounded-xl border border-border bg-white px-4 py-3 text-text-primary placeholder:text-text-placeholder;
+    @apply text-sm font-medium transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-brand-green focus:border-brand-green;
+    @apply disabled:opacity-50 disabled:bg-surface-muted;
+  }
+
+  .label {
+    @apply block text-sm font-semibold text-text-secondary mb-1.5;
+  }
+
+  .input-error {
+    @apply border-status-error focus:ring-status-error;
+  }
+
+  .error-message {
+    @apply text-xs text-status-error mt-1 font-medium;
+  }
+
+  /* -------- Badges / Pills -------- */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+
+  .badge-green {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold bg-status-success-bg text-status-success;
+  }
+
+  .badge-turmeric {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold bg-status-warning-bg text-status-warning;
+  }
+
+  .badge-red {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold bg-status-error-bg text-status-error;
+  }
+
+  .badge-gray {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold bg-surface-muted text-text-muted;
+  }
+
+  /* -------- Chip / Tag (selectable) -------- */
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-border px-3.5 py-1.5 text-sm font-medium;
+    @apply cursor-pointer transition-all duration-200 select-none;
+    @apply hover:border-brand-green hover:text-brand-green hover:bg-status-success-bg;
+  }
+
+  .chip-selected {
+    @apply border-brand-green bg-status-success-bg text-brand-green font-semibold;
+  }
+
+  /* -------- Section -------- */
+  .section {
+    @apply py-16 md:py-24;
+  }
+
+  .section-sm {
+    @apply py-10 md:py-16;
+  }
+
+  .container-app {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .container-narrow {
+    @apply mx-auto max-w-2xl px-4 sm:px-6;
+  }
+
+  /* -------- Dividers -------- */
+  .divider {
+    @apply border-t border-border-muted my-6;
+  }
+
+  /* -------- Skeleton Loading -------- */
+  .skeleton {
+    @apply bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 rounded-xl;
+    background-size: 200% 100%;
+    animation: shimmer 1.8s infinite linear;
+  }
+
+  /* -------- Gradient Text -------- */
+  .text-gradient-brand {
+    @apply bg-gradient-to-r from-brand-green to-brand-green-light bg-clip-text text-transparent;
+  }
+
+  /* -------- Page heading -------- */
+  .page-title {
+    @apply text-2xl md:text-3xl font-bold text-text-primary tracking-tight;
+  }
+
+  .section-title {
+    @apply text-xl md:text-2xl font-bold text-text-primary tracking-tight;
+  }
+
+  /* -------- Alert / Safety banner -------- */
+  .alert-info {
+    @apply rounded-xl border border-status-info-bg bg-status-info-bg p-4 text-sm text-status-info;
+  }
+
+  .alert-warning {
+    @apply rounded-xl border border-status-warning-bg bg-status-warning-bg p-4 text-sm text-status-warning;
+  }
+
+  .alert-success {
+    @apply rounded-xl border border-status-success-bg bg-status-success-bg p-4 text-sm text-status-success;
+  }
+
+  /* -------- Bottom nav (mobile) -------- */
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-border-muted;
+    @apply grid grid-cols-5 md:hidden;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .bottom-nav-item {
+    @apply flex flex-col items-center justify-center py-2 gap-0.5 text-text-muted;
+    @apply transition-colors duration-200 cursor-pointer;
+  }
+
+  .bottom-nav-item.active {
+    @apply text-brand-green;
+  }
+
+  /* -------- Recipe card illustration area -------- */
+  .recipe-illustration {
+    @apply relative overflow-hidden rounded-xl;
+  }
+
+  /* -------- Progress bar -------- */
+  .progress-bar {
+    @apply h-1.5 rounded-full bg-border-muted overflow-hidden;
+  }
+
+  .progress-fill {
+    @apply h-full bg-brand-green rounded-full transition-all duration-500 ease-out;
+  }
+}
+
+@layer utilities {
+  /* Safe area padding for iOS */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0.5rem);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0.5rem);
+  }
+
+  /* Text balance */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Smooth gradient */
+  .mask-gradient-bottom {
+    mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  }
+
+  /* Hide scrollbar but keep scrollability */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
