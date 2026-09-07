@@ -67,7 +67,7 @@ export default function HomePage() {
   const greeting =
     hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
-  const nudge = habitNudges[Math.floor(Math.random() * habitNudges.length)];
+  const nudge = habitNudges[now.getDate() % habitNudges.length];
 
   return (
     <div className="container-app py-8 md:py-10 max-w-3xl">
