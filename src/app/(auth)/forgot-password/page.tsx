@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Leaf, AlertCircle, Loader2, Check, ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { getAuthRedirect } from "@/lib/auth-redirect";
 import { cn } from "@/lib/utils";
 
 export default function ForgotPasswordPage() {
@@ -23,7 +24,7 @@ export default function ForgotPasswordPage() {
       const { error: authError } = await supabase.auth.resetPasswordForEmail(
         email.trim().toLowerCase(),
         {
-          redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`,
+          redirectTo: getAuthRedirect("/reset-password"),
         }
       );
       // Always show success to prevent email enumeration

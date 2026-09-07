@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Leaf, Eye, EyeOff, AlertCircle, Loader2, Check } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { getAuthRedirect } from "@/lib/auth-redirect";
 import { cn } from "@/lib/utils";
 
 const DIETARY_OPTIONS = [
@@ -45,7 +46,7 @@ export default function SignupPage() {
         email: email.trim().toLowerCase(),
         password,
         options: {
-          emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/onboarding`,
+          emailRedirectTo: getAuthRedirect("/auth/callback?next=/onboarding"),
           data: { dietary_pattern: diet },
         },
       });
@@ -74,7 +75,7 @@ export default function SignupPage() {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/onboarding`,
+        redirectTo: getAuthRedirect("/auth/callback?next=/onboarding"),
       },
     });
   }

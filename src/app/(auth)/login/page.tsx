@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Leaf, Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { getAuthRedirect } from "@/lib/auth-redirect";
 import { cn } from "@/lib/utils";
 
 function LoginForm() {
@@ -53,7 +54,7 @@ function LoginForm() {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=${next}`,
+        redirectTo: getAuthRedirect(`/auth/callback?next=${encodeURIComponent(next)}`),
       },
     });
   }
