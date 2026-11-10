@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAuthAPI, handleApiError, checkRateLimit } from "@/lib/api-helpers";
 import { addGroceryItemSchema, updateGroceryItemSchema } from "@/lib/validations/api";
 import prisma from "@/lib/prisma";
+import { GroceryCategory } from "@prisma/client";
 
 export async function GET() {
   try {
@@ -69,14 +70,14 @@ export async function POST(request: Request) {
       }
 
       const createdItems = await prisma.$transaction(
-        body.items.map((item: any) =>
+        body.items.map((item: { name: string; quantity?: string; unit?: string; category?: string; recipeId?: string }) =>
           prisma.groceryItem.create({
             data: {
               groceryListId: list!.id,
               name: item.name,
               quantity: item.quantity || "1",
               unit: item.unit || "",
-              category: item.category || "OTHER",
+              category: (item.category as GroceryCategory) || GroceryCategory.OTHER,
               recipeId: item.recipeId,
               isManual: true,
             },

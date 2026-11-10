@@ -66,7 +66,7 @@ const vegetarianUser: UserContext = {
   allergens: ["peanuts"],
   foodDislikes: [],
   cuisineRegions: ["NORTH_INDIAN", "PAN_INDIAN"],
-  cookingSkill: "EASY" as any,
+  cookingSkill: "BEGINNER",
   budgetMax: 100,
   timeMinutes: 30,
   mealType: "DINNER",

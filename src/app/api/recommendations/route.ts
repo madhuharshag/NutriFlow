@@ -4,6 +4,7 @@ import { recommendationRequestSchema } from "@/lib/validations/recommendations";
 import { getTopRecommendations } from "@/lib/recommendation/engine";
 import type { RecipeForScoring, UserContext } from "@/lib/recommendation/engine";
 import prisma from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
 
 export async function POST(request: Request) {
   try {
@@ -46,7 +47,7 @@ export async function POST(request: Request) {
       allergens: userAllergens.map((a) => a.allergen.toLowerCase()),
       foodDislikes: [...(userPrefs?.foodDislikes || []), ...validated.excludedIngredients],
       cuisineRegions: validated.cuisineRegions || userPrefs?.cuisineRegions || ["PAN_INDIAN"],
-      cookingSkill: (validated.cookingSkill || userPrefs?.cookingSkill || "BEGINNER") as any,
+      cookingSkill: (validated.cookingSkill || userPrefs?.cookingSkill || "BEGINNER") as UserContext["cookingSkill"],
       budgetMax: validated.budgetLimitINR || userPrefs?.budgetMax || 150,
       timeMinutes: validated.timeLimitMinutes || userPrefs?.timeMinutes || 30,
       mealType: validated.mealType,
@@ -83,7 +84,7 @@ export async function POST(request: Request) {
         mealTypes: r.mealTypes,
         cuisineRegion: r.cuisineRegion,
         dietaryPatterns: r.dietaryPatterns,
-        difficultyLevel: r.difficultyLevel as any,
+        difficultyLevel: r.difficultyLevel as RecipeForScoring["difficultyLevel"],
         totalTimeMinutes: r.totalTimeMinutes,
         costMin: r.costMin,
         costMax: r.costMax,
@@ -129,7 +130,7 @@ export async function POST(request: Request) {
                 humanReasons: rec.humanReasons,
                 missingIngredients: rec.missingIngredients,
                 suitabilityLabel: rec.suitabilityLabel,
-                contextSnapshot: ctx as any,
+                contextSnapshot: ctx as unknown as Prisma.InputJsonValue,
               },
             })
           )

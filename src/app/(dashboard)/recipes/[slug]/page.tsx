@@ -2,7 +2,6 @@ import Link from "next/link";
 import {
   Clock,
   IndianRupee,
-  ChefHat,
   Users,
   ArrowLeft,
   Bookmark,
@@ -14,7 +13,61 @@ import {
 
 // ── Demo recipe data (Phase 3 replaces with DB lookup) ────────────────────────
 
-const recipeData: Record<string, any> = {
+interface RecipeIngredient {
+  name: string;
+  quantity?: number | string;
+  unit?: string;
+  notes?: string;
+  category?: string;
+  isPantryStaple?: boolean;
+}
+
+interface RecipeSubstitution {
+  original: string;
+  substitute: string;
+  note?: string;
+}
+
+interface RecipeStep {
+  step: number;
+  instruction: string;
+  durationMinutes?: number;
+  tip?: string;
+}
+
+interface RecipeDetail {
+  name: string;
+  description: string;
+  mealTypes: string[];
+  cuisineRegion: string;
+  dietaryLabels: string[];
+  difficultyLevel: string;
+  prepTimeMinutes: number;
+  cookTimeMinutes: number;
+  totalTimeMinutes: number;
+  servings: number;
+  costMin: number;
+  costMax: number;
+  emoji: string;
+  gradient: string;
+  proteinSource?: string;
+  nutritionNote?: string;
+  tags?: string[];
+  caloriesApprox?: number;
+  proteinG?: number;
+  carbsG?: number;
+  fatG?: number;
+  fiberG?: number;
+  ingredients: RecipeIngredient[];
+  substitutions: RecipeSubstitution[];
+  steps: RecipeStep[];
+  storageNotes?: string;
+  whyItWorks?: string;
+  allergenFree?: string[];
+  allergenWarnings?: string[];
+}
+
+const recipeData: Record<string, RecipeDetail> = {
   "moong-dal-khichdi": {
     name: "Moong Dal Khichdi",
     description:
@@ -198,7 +251,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
           Recipe not found
         </h1>
         <p className="text-text-muted mb-6">
-          This recipe doesn't exist or has been removed.
+          This recipe doesn&apos;t exist or has been removed.
         </p>
         <Link href="/recommendations" className="btn-primary btn-md">
           Find other meals
@@ -310,7 +363,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
         </h2>
         <div className="card overflow-hidden">
           <ul role="list">
-            {recipe.ingredients.map((ing: any, i: number) => (
+            {recipe.ingredients.map((ing: RecipeIngredient, i: number) => (
               <li
                 key={i}
                 className="flex items-start gap-3 px-5 py-3 border-b border-border-muted last:border-0"
@@ -342,7 +395,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
             Substitutions
           </h2>
           <div className="flex flex-col gap-2">
-            {recipe.substitutions.map((sub: any, i: number) => (
+            {recipe.substitutions.map((sub: RecipeSubstitution, i: number) => (
               <div key={i} className="card p-4">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-sm font-semibold text-text-primary">
@@ -368,7 +421,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
           How to make it
         </h2>
         <ol className="flex flex-col gap-3" role="list">
-          {recipe.steps.map((step: any) => (
+          {recipe.steps.map((step: RecipeStep) => (
             <li key={step.step} className="card p-4 flex gap-4">
               <div className="w-7 h-7 rounded-full bg-brand-green text-white text-sm font-bold flex items-center justify-center shrink-0">
                 {step.step}

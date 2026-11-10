@@ -29,7 +29,7 @@ export default function GroceryListPage() {
       .then((data) => {
         if (data?.items && data.items.length > 0) {
           setItems(
-            data.items.map((i: any) => ({
+            data.items.map((i: { id: string; name: string; isChecked: boolean; category?: string }) => ({
               id: i.id,
               name: i.name,
               checked: i.isChecked,
@@ -202,7 +202,7 @@ export default function GroceryListPage() {
                 </h3>
                 <div className="card overflow-hidden">
                   <ul className="flex flex-col">
-                    {categoryItems.map((item, index) => (
+                    {categoryItems.map((item) => (
                       <li 
                         key={item.id}
                         className={cn(

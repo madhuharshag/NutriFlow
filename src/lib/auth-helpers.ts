@@ -2,7 +2,6 @@ import { createClient } from "./supabase/server";
 import { redirect } from "next/navigation";
 import prisma from "./prisma";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
-import type { User as DbUser } from "@prisma/client";
 
 /**
  * Gets the current authenticated Supabase user.

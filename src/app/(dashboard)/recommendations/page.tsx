@@ -11,17 +11,24 @@ import {
   Bookmark,
   ArrowLeft,
   ThumbsUp,
-  ThumbsDown,
   Info,
   AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { ScoredRecipe } from "@/lib/recommendation/engine";
+import type { ScoredRecipe, RecipeForScoring, UserContext } from "@/lib/recommendation/engine";
 import { getTopRecommendations } from "@/lib/recommendation/engine";
 
 // ── Static recipe data for demo (Phase 3 replaces this with DB) ──────────────
 
-const DEMO_RECIPES = [
+type DemoRecipe = RecipeForScoring & {
+  emoji: string;
+  gradient: string;
+  prepTimeMinutes?: number;
+  cookTimeMinutes?: number;
+  servings?: number;
+};
+
+const DEMO_RECIPES: DemoRecipe[] = [
   {
     id: "r1",
     slug: "moong-dal-khichdi",
@@ -192,10 +199,10 @@ function RecommendationCard({
   scored,
   index,
 }: {
-  scored: ScoredRecipe & { recipe: (typeof DEMO_RECIPES)[0] };
+  scored: ScoredRecipe & { recipe: DemoRecipe };
   index: number;
 }) {
-  const { recipe, humanReasons, missingIngredients, suitabilityLabel, totalScore } = scored;
+  const { recipe, humanReasons, missingIngredients, suitabilityLabel } = scored;
 
   const rankColors = ["text-brand-turmeric", "text-brand-green", "text-text-muted"];
   const rankBgs = ["bg-status-warning-bg", "bg-status-success-bg", "bg-surface-muted"];
@@ -404,13 +411,16 @@ function RecommendationsContent() {
     ? rawIngredients.split(",").filter(Boolean)
     : [];
 
+  const cookingSkill: UserContext["cookingSkill"] =
+    effort === "MODERATE" ? "COMFORTABLE" : "BEGINNER";
+
   // Run recommendation engine with demo data
-  const userContext = {
+  const userContext: UserContext = {
     dietaryPattern: "VEGETARIAN",
     allergens: [],
     foodDislikes: [],
     cuisineRegions: ["MIXED_INDIAN"],
-    cookingSkill: "BEGINNER" as const,
+    cookingSkill,
     budgetMax: budget,
     timeMinutes: timeLimit,
     mealType: mealType as "BREAKFAST" | "LUNCH" | "SNACK" | "DINNER",
@@ -418,7 +428,7 @@ function RecommendationsContent() {
     goals: [],
   };
 
-  const results = getTopRecommendations(DEMO_RECIPES as any, userContext, 3);
+  const results = getTopRecommendations(DEMO_RECIPES, userContext, 3);
 
   const mealTypeLabels: Record<string, string> = {
     BREAKFAST: "breakfast",
@@ -473,7 +483,7 @@ function RecommendationsContent() {
           {results.map((scored, i) => (
             <RecommendationCard
               key={scored.recipe.id}
-              scored={scored as any}
+              scored={scored as ScoredRecipe & { recipe: DemoRecipe }}
               index={i}
             />
           ))}

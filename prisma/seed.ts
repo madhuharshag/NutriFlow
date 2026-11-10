@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, IngredientCategory } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -80,13 +80,13 @@ async function main() {
     const created = await prisma.ingredient.upsert({
       where: { name: ing.name },
       update: {
-        category: ing.category as any,
+        category: ing.category as IngredientCategory,
         isAllergen: ing.isAllergen,
         allergenTags: ing.allergenTags,
       },
       create: {
         name: ing.name,
-        category: ing.category as any,
+        category: ing.category as IngredientCategory,
         isAllergen: ing.isAllergen,
         allergenTags: ing.allergenTags,
       },

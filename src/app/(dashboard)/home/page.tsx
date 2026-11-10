@@ -173,7 +173,7 @@ export default function HomePage() {
         </div>
         <div>
           <p className="text-sm font-semibold text-text-primary">
-            It's {mealTime.toLowerCase()} time
+            It&apos;s {mealTime.toLowerCase()} time
           </p>
           <p className="text-xs text-text-muted">
             {mealTime === "Breakfast"

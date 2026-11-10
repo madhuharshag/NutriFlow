@@ -37,7 +37,7 @@ export default function PantryPage() {
       .then((data) => {
         if (data?.items && data.items.length > 0) {
           setPantryItems(
-            data.items.map((i: any) => ({
+            data.items.map((i: { id: string; name: string; isLow: boolean; category?: string }) => ({
               id: i.id,
               name: i.name,
               isLow: i.isLow,

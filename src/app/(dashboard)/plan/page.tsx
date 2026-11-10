@@ -146,7 +146,7 @@ export default function PlanPage() {
       <div className="mb-8">
         <h1 className="page-title mb-1">Plan my next meal</h1>
         <p className="text-text-muted">
-          Tell us your situation and we'll find practical options for you.
+          Tell us your situation and we&apos;ll find practical options for you.
         </p>
       </div>
 

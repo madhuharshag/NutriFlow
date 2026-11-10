@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAuthAPI, handleApiError, checkRateLimit } from "@/lib/api-helpers";
 import { updateProfileSchema } from "@/lib/validations/api";
 import prisma from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
 
 export async function GET() {
   try {
@@ -74,7 +75,7 @@ export async function PATCH(request: Request) {
         });
       }
 
-      const prefUpdates: any = {};
+      const prefUpdates: Prisma.UserPreferenceUncheckedUpdateInput = {};
       if (validated.dietaryPattern) prefUpdates.dietaryPattern = validated.dietaryPattern;
       if (validated.cookingSkill) prefUpdates.cookingSkill = validated.cookingSkill;
       if (validated.budgetMin !== undefined) prefUpdates.budgetMin = validated.budgetMin;
@@ -88,7 +89,7 @@ export async function PATCH(request: Request) {
           create: {
             userId: auth.dbUser.id,
             ...prefUpdates,
-          },
+          } as Prisma.UserPreferenceUncheckedCreateInput,
         });
       }
     });

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAuthAPI, handleApiError, checkRateLimit } from "@/lib/api-helpers";
 import { onboardingSchema } from "@/lib/validations/onboarding";
 import prisma from "@/lib/prisma";
+import { IngredientCategory } from "@prisma/client";
 
 export async function POST(request: Request) {
   try {
@@ -96,7 +97,7 @@ export async function POST(request: Request) {
             ingredient = await tx.ingredient.create({
               data: {
                 name: trimmed,
-                category: "PANTRY" as any,
+                category: IngredientCategory.OTHER,
               },
             });
           }

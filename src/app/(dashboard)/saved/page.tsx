@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Bookmark, Clock, Search, SlidersHorizontal, Trash2 } from "lucide-react";
+import { Bookmark, Clock, Search, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Mock saved recipes
@@ -38,7 +38,7 @@ export default function SavedMealsPage() {
       .then((data) => {
         if (data?.savedMeals && data.savedMeals.length > 0) {
           setRecipes(
-            data.savedMeals.map((m: any) => ({
+            data.savedMeals.map((m: { id: string; slug: string; name: string; totalTimeMinutes?: number; mealTypes?: string[] }) => ({
               id: m.id,
               slug: m.slug,
               name: m.name,
