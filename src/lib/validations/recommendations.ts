@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { dietaryPatternEnum, cookingSkillEnum, mealTypeEnum, cuisineRegionEnum } from "./onboarding";
+import { dietaryPatternEnum, cookingSkillEnum, mealTypeEnum, cuisineRegionEnum } from "./onboarding.ts";
 
 export const recommendationRequestSchema = z.object({
   mealType: mealTypeEnum.default("DINNER"),
