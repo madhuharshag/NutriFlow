@@ -44,7 +44,7 @@ export default function TermsPage() {
 
         <h2 className="text-xl font-bold text-text-primary mt-8 mb-4">5. Disclaimer of Warranties</h2>
         <p className="mb-6">
-          The service is provided on an "AS IS" and "AS AVAILABLE" basis. NutriFlow makes no warranties, expressed or implied, regarding the accuracy of nutritional information, recipe outcomes, or continuous availability of the service. Please see our <Link href="/disclaimer" className="text-brand-green hover:underline">Wellness Disclaimer</Link> for important health-related limitations.
+          The service is provided on an &quot;AS IS&quot; and &quot;AS AVAILABLE&quot; basis. NutriFlow makes no warranties, expressed or implied, regarding the accuracy of nutritional information, recipe outcomes, or continuous availability of the service. Please see our <Link href="/disclaimer" className="text-brand-green hover:underline">Wellness Disclaimer</Link> for important health-related limitations.
         </p>
 
         <h2 className="text-xl font-bold text-text-primary mt-8 mb-4">6. Limitation of Liability</h2>

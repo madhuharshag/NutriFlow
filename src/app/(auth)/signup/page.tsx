@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Leaf, Eye, EyeOff, AlertCircle, Loader2, Check } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { getAuthRedirect } from "@/lib/auth-redirect";
@@ -25,7 +24,6 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const router = useRouter();
 
   const passwordStrong = password.length >= 8;
 
@@ -107,12 +105,12 @@ export default function SignupPage() {
             Check your email!
           </h1>
           <p className="text-sm text-text-muted mb-6">
-            We've sent a verification link to{" "}
+            We&apos;ve sent a verification link to{" "}
             <strong className="text-text-secondary">{email}</strong>. Click the
             link to activate your NutriFlow account.
           </p>
           <p className="text-xs text-text-placeholder">
-            Didn't get the email? Check your spam folder or{" "}
+            Didn&apos;t get the email? Check your spam folder or{" "}
             <button
               onClick={() => setSuccess(false)}
               className="text-brand-green hover:underline"

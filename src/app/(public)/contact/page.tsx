@@ -11,7 +11,7 @@ export default function ContactPage() {
       
       <h1 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">Contact Us</h1>
       <p className="text-text-muted mb-8">
-        Have questions, feedback, or need help? We'd love to hear from you.
+        Have questions, feedback, or need help? We&apos;d love to hear from you.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
@@ -45,7 +45,7 @@ export default function ContactPage() {
       <div className="card p-8 bg-surface-muted border-none text-center">
         <h2 className="text-xl font-bold text-text-primary mb-2">Data Privacy Requests</h2>
         <p className="text-sm text-text-muted mb-6 max-w-md mx-auto">
-          If you wish to export your personal data or permanently delete your account in accordance with privacy laws, please email us directly with the subject line "Data Request".
+          If you wish to export your personal data or permanently delete your account in accordance with privacy laws, please email us directly with the subject line &quot;Data Request&quot;.
         </p>
         <a href="mailto:privacy@nutriflow.example.com?subject=Data Request" className="btn-secondary btn-md inline-flex">
           Contact Privacy Team

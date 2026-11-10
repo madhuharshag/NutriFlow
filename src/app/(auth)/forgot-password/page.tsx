@@ -64,7 +64,7 @@ export default function ForgotPasswordPage() {
             </h1>
             <p className="text-sm text-text-muted mb-6">
               If an account exists for{" "}
-              <strong className="text-text-secondary">{email}</strong>, we've
+              <strong className="text-text-secondary">{email}</strong>, we&apos;ve
               sent password reset instructions.
             </p>
             <Link
@@ -82,7 +82,7 @@ export default function ForgotPasswordPage() {
                 Reset your password
               </h1>
               <p className="text-sm text-text-muted">
-                Enter your email and we'll send you a link to reset your
+                Enter your email and we&apos;ll send you a link to reset your
                 password.
               </p>
             </div>

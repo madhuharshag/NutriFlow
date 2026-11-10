@@ -44,7 +44,7 @@ export default function DisclaimerPage() {
         </p>
         <ul className="list-disc pl-6 mb-6 space-y-2">
           <li>Always carefully read the ingredient labels on packaged foods you purchase, as manufacturing practices and cross-contamination risks change.</li>
-          <li>If you have a severe or life-threatening food allergy (e.g., anaphylaxis), do not rely solely on the app's filtering system. Always double-check recipe ingredients manually.</li>
+          <li>If you have a severe or life-threatening food allergy (e.g., anaphylaxis), do not rely solely on the app&apos;s filtering system. Always double-check recipe ingredients manually.</li>
           <li>Ensure proper food handling, storage, and cooking temperatures to prevent foodborne illnesses.</li>
         </ul>
 

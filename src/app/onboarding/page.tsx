@@ -99,7 +99,7 @@ export default function OnboardingPage() {
         {step === 1 && (
           <div className="animate-fade-in">
             <h1 className="text-2xl font-bold mb-2">What is your primary diet?</h1>
-            <p className="text-text-muted mb-6">We'll filter out meals that don't fit.</p>
+            <p className="text-text-muted mb-6">We&apos;ll filter out meals that don&apos;t fit.</p>
             <div className="flex flex-col gap-3">
               {[
                 { id: "VEGETARIAN", label: "Vegetarian", desc: "No meat, poultry, or seafood" },
@@ -151,7 +151,7 @@ export default function OnboardingPage() {
         {step === 3 && (
           <div className="animate-fade-in">
             <h1 className="text-2xl font-bold mb-2">Any ingredients you dislike?</h1>
-            <p className="text-text-muted mb-6">We won't suggest meals where these are main ingredients.</p>
+            <p className="text-text-muted mb-6">We won&apos;t suggest meals where these are main ingredients.</p>
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input
@@ -241,8 +241,8 @@ export default function OnboardingPage() {
 
         {step === 6 && (
           <div className="animate-fade-in">
-            <h1 className="text-2xl font-bold mb-2">What's your typical budget per meal?</h1>
-            <p className="text-text-muted mb-6">We'll prioritize meals that fit this limit.</p>
+            <h1 className="text-2xl font-bold mb-2">What&apos;s your typical budget per meal?</h1>
+            <p className="text-text-muted mb-6">We&apos;ll prioritize meals that fit this limit.</p>
             <div className="flex flex-col gap-3">
               {[
                 { value: 50, label: "Under ₹50 (Very tight)" },
@@ -271,7 +271,7 @@ export default function OnboardingPage() {
         {step === 7 && (
           <div className="animate-fade-in">
             <h1 className="text-2xl font-bold mb-2">How much time can you usually spend cooking?</h1>
-            <p className="text-text-muted mb-6">We'll focus on recipes that fit your schedule.</p>
+            <p className="text-text-muted mb-6">We&apos;ll focus on recipes that fit your schedule.</p>
             <div className="grid grid-cols-2 gap-3">
               {[
                 { value: 10, label: "Under 10 mins" },
@@ -299,7 +299,7 @@ export default function OnboardingPage() {
 
         {step === 8 && (
           <div className="animate-fade-in">
-            <h1 className="text-2xl font-bold mb-2">What's your main goal?</h1>
+            <h1 className="text-2xl font-bold mb-2">What&apos;s your main goal?</h1>
             <p className="text-text-muted mb-6">Select a few things you want to achieve.</p>
             <div className="flex flex-col gap-3">
               {[
@@ -330,7 +330,7 @@ export default function OnboardingPage() {
 
         {step === 9 && (
           <div className="animate-fade-in">
-            <h1 className="text-2xl font-bold mb-2">What's in your pantry right now?</h1>
+            <h1 className="text-2xl font-bold mb-2">What&apos;s in your pantry right now?</h1>
             <p className="text-text-muted mb-6">Select a few common items to start with.</p>
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />

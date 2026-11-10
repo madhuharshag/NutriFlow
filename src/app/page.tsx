@@ -534,7 +534,7 @@ export default function LandingPage() {
                 className="btn-primary btn-lg"
                 id="how-it-works-cta"
               >
-                Try it now — it's free
+                Try it now — it&apos;s free
                 <ArrowRight className="w-5 h-5" aria-hidden="true" />
               </Link>
             </div>
@@ -568,7 +568,7 @@ export default function LandingPage() {
                   is built for decision-making — helping you answer the daily
                   question:{" "}
                   <em className="text-text-secondary font-medium">
-                    "What should I eat next?"
+                    &quot;What should I eat next?&quot;
                   </em>
                 </p>
 
@@ -637,8 +637,8 @@ export default function LandingPage() {
                     🤔
                   </div>
                   <p className="text-2xl font-bold text-text-primary mb-4 leading-snug text-balance">
-                    "I have rice, dal, onion, and 20 minutes. What should I
-                    make?"
+                    &quot;I have rice, dal, onion, and 20 minutes. What should I
+                    make?&quot;
                   </p>
                   <p className="text-text-muted text-sm mb-6">
                     This is the everyday question NutriFlow answers — not a
@@ -733,7 +733,7 @@ export default function LandingPage() {
             </h2>
             <p className="text-white/70 text-base mb-5 leading-relaxed">
               Dietary preferences, allergies, and food choices are sensitive
-              information. NutriFlow collects only what's needed to help you
+              information. NutriFlow collects only what&apos;s needed to help you
               plan meals — never to sell or advertise to you.
             </p>
             <div className="flex flex-wrap justify-center gap-3 text-sm">
@@ -774,7 +774,7 @@ export default function LandingPage() {
                 Common questions
               </h2>
               <p className="text-text-muted">
-                Honest answers about what NutriFlow is and isn't.
+                Honest answers about what NutriFlow is and isn&apos;t.
               </p>
             </div>
 
@@ -799,7 +799,7 @@ export default function LandingPage() {
               id="final-cta-heading"
               className="text-white text-3xl md:text-4xl mb-4"
             >
-              What's your next meal?
+              What&apos;s your next meal?
             </h2>
             <p className="text-white/80 text-lg mb-8 max-w-md mx-auto leading-relaxed">
               Stop wondering, start eating well. Let NutriFlow find a practical
@@ -810,7 +810,7 @@ export default function LandingPage() {
               className="inline-flex items-center gap-2 bg-white text-brand-green font-bold text-lg px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl hover:bg-white/95 transition-all active:scale-[0.98]"
               id="final-cta"
             >
-              Plan my next meal — it's free
+              Plan my next meal — it&apos;s free
               <ArrowRight className="w-5 h-5" aria-hidden="true" />
             </Link>
             <p className="text-white/50 text-sm mt-4">
