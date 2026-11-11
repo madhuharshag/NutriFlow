@@ -117,4 +117,32 @@ describe("Recommendation Engine", () => {
     assert.strictEqual(scored.isPassing, false);
     assert.strictEqual(getTopRecommendations([recipe], user as UserContext, 0).length, 0);
   });
+
+  it("reduces variety score for recently cooked recipes", () => {
+    const freshScore = scoreRecipe(sampleRecipes[0], vegetarianUser);
+    const repeatUser: UserContext = {
+      ...vegetarianUser,
+      recentRecipeIds: [sampleRecipes[0].id],
+    };
+    const repeatScore = scoreRecipe(sampleRecipes[0], repeatUser);
+    assert.ok(repeatScore.subscores.variety < freshScore.subscores.variety);
+    assert.ok(repeatScore.totalScore < freshScore.totalScore);
+  });
+
+  it("penalizes recipes exceeding user time or budget limits", () => {
+    const tightUser: UserContext = {
+      ...vegetarianUser,
+      budgetMax: 20,
+      timeMinutes: 10,
+    };
+    const tightScore = scoreRecipe(sampleRecipes[0], tightUser);
+    const comfortableScore = scoreRecipe(sampleRecipes[0], vegetarianUser);
+    assert.ok(tightScore.subscores.budgetFit < comfortableScore.subscores.budgetFit);
+    assert.ok(tightScore.subscores.timeFit < comfortableScore.subscores.timeFit);
+  });
+
+  it("handles empty recipe lists cleanly", () => {
+    const results = getTopRecommendations([], vegetarianUser, 5);
+    assert.deepStrictEqual(results, []);
+  });
 });
