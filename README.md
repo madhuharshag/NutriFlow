@@ -38,12 +38,18 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for a detailed overview.
 7. Run build: `npm run build`.
 8. Start dev server: `npm run dev`.
 
-## Health Check Endpoint
+## Monitoring & Health Probes
 
-NutriFlow provides an automated health status endpoint at `/api/health`:
-- Returns HTTP `200` with status `"ok"` when services are operational.
-- Returns HTTP `503` with status `"degraded"` if database connectivity drops.
-- Reports uptime, environment, and latency metrics in JSON format.
+NutriFlow provides automated monitoring and container probe endpoints:
+- **Liveness & Health (`/api/health`)**: Returns HTTP `200` with uptime, environment, and latency metrics; returns `503` if database connectivity drops.
+- **Readiness (`/api/ready`)**: Lightweight container readiness probe verifying pool connectivity for Kubernetes/Docker deployments.
+
+## Core Utilities
+
+- **Nutrition Calculators (`src/lib/nutrition.ts`)**: Deterministic Mifflin-St Jeor BMR estimation, activity-based TDEE, and balanced macronutrient breakdowns.
+- **Grocery Consolidation (`src/lib/grocery.ts`)**: Intelligent item grouping, alias normalization, and unit conversion.
+- **Pantry Freshness (`src/lib/pantry-shelf-life.ts`)**: Category-specific shelf-life estimation and expiration warning detection.
+- **Recipe Filtering & Sorting (`src/lib/recipe-filters.ts`)**: Filter and sort recipes by max cooking time, difficulty level, and estimated cost.
 
 ## Documentation & Contributing
 
