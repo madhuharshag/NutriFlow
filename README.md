@@ -47,9 +47,17 @@ NutriFlow provides automated monitoring and container probe endpoints:
 ## Core Utilities
 
 - **Nutrition Calculators (`src/lib/nutrition.ts`)**: Deterministic Mifflin-St Jeor BMR estimation, activity-based TDEE, and balanced macronutrient breakdowns.
+- **Hydration Recommendations (`src/lib/water-intake.ts`)**: Daily water intake estimator incorporating climate temperature, humidity, and exercise intensity.
+- **Recipe Serving Scaler (`src/lib/recipe-scaler.ts`)**: Proportional ingredient amount and cost scaling with sensible culinary fraction formatting.
+- **Daily Meal Plan Aggregator (`src/lib/plan-aggregator.ts`)**: Consolidates multi-meal calories, macros, preparation time, and budget compliance against user targets.
+- **Dietary & Allergen Safety (`src/lib/allergen-checker.ts`)**: Standalone conflict detector flagging dietary pattern violations and allergens across ingredient sets.
 - **Grocery Consolidation (`src/lib/grocery.ts`)**: Intelligent item grouping, alias normalization, and unit conversion.
+- **Grocery Export Formats (`src/lib/grocery-export.ts`)**: Plaintext, Markdown, and URL-encoded messaging formatters (WhatsApp, SMS) for grocery lists.
 - **Pantry Freshness (`src/lib/pantry-shelf-life.ts`)**: Category-specific shelf-life estimation and expiration warning detection.
+- **Pantry Token Search (`src/lib/pantry-search.ts`)**: Multi-token fuzzy-normalized matching and category-based filtering for pantry inventories.
 - **Recipe Filtering & Sorting (`src/lib/recipe-filters.ts`)**: Filter and sort recipes by max cooking time, difficulty level, and estimated cost.
+- **Cooking Effort & One-Pot Scorer (`src/lib/cooking-effort.ts`)**: Cooking effort index combining prep/cook time, step counts, and one-pot meal detection.
+- **Server-Timing Telemetry (`src/lib/perf-timing.ts`)**: Non-throwing high-resolution execution timer and W3C `Server-Timing` header generator for API route telemetry.
 
 ## Documentation & Contributing
 

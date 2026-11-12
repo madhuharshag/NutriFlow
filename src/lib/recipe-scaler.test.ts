@@ -45,4 +45,11 @@ describe("Recipe Serving Scaler", () => {
     const baseRecipe = { servings: 2, ingredients: [] };
     assert.throws(() => scaleRecipe(baseRecipe, 0));
   });
+
+  it("parses numeric and string quantity representations cleanly", () => {
+    assert.deepStrictEqual(parseNumericQuantity(2.5), { value: 2.5, suffix: "" });
+    assert.deepStrictEqual(parseNumericQuantity("300 g"), { value: 300, suffix: "g" });
+    assert.deepStrictEqual(parseNumericQuantity("to taste"), { value: null, suffix: "to taste" });
+    assert.deepStrictEqual(parseNumericQuantity(undefined), { value: null, suffix: "" });
+  });
 });
